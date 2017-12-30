@@ -1,10 +1,7 @@
 {
   "name": "qunit-puppeteer",
-  "version": "1.0.1",
-  "description": "A test harness for running QUnit tests in headless Chromium",
-  "bin": {
-    "qunit-puppeteer": "bin/qunit-puppeteer.js"
-  },
+  "version": "1.0.2",
+  "description": "A test harness for running QUnit tests in headless Chromium (in Grunt)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/davidtaylorhq/qunit-puppeteer.git"
