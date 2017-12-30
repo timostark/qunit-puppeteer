@@ -3,7 +3,7 @@
 var args = process.argv.slice(2);
 
 if (args.length < 1 || args.length > 2) {
-  console.log("Usage: node run-qunit-chrome.js <URL> <timeout>");
+  console.log("Usage1: node run-qunit-chrome.js <URL> <timeout>");
   process.exit(1);
 }
 
@@ -99,15 +99,7 @@ const puppeteer = require('puppeteer');
 
     console.log("\nRunning: " + JSON.stringify(QUnit.urlParams) + "\n");
   });
-
-  function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-  await wait(timeout);
-
-  console.error("Tests timed out");
-  browser.close();
-  process.exit(124);
+  
 })().catch((error) => {
   console.error(error);
   process.exit(1);
