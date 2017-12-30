@@ -1,10 +1,10 @@
 {
-  "name": "qunit-puppeteer",
+  "name": "grunt-qunit-puppeteer",
   "version": "1.0.2",
   "description": "A test harness for running QUnit tests in headless Chromium (in Grunt)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidtaylorhq/qunit-puppeteer.git"
+    "url": "git+https://github.com/timostark/qunit-puppeteer.git"
   },
   "dependencies": {
     "grunt": "^1.0.1",
@@ -23,12 +23,13 @@
     "chrome",
     "puppeteer",
     "headless",
-    "testing"
+    "testing",
+    "grunt"
   ],
-  "author": "David Taylor",
+  "author": "Timo Stark",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/davidtaylorhq/qunit-puppeteer/issues"
+    "url": "https://github.com/timostark/qunit-puppeteer/issues"
   },
-  "homepage": "https://github.com/davidtaylorhq/qunit-puppeteer#readme"
+  "homepage": "https://github.com/timostark/qunit-puppeteer#readme"
 }

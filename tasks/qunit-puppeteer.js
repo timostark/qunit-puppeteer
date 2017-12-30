@@ -12,6 +12,25 @@ module.exports = function (grunt) {
     var oOptions = this.options({
       resources: {}
     });
+    
+    /*if (!oOptions.chromeExecutable) {
+      grunt.fail.warn('chromeUrl missing.');
+      done();
+      return;
+    }*/
+    if (!oOptions.qunitPage) {
+      grunt.fail.warn('qunitPage missing.');
+      done();
+      return;
+    }
+    
+    if (typeof oOptions.headless === "undefined") {
+      oOptions.headless = true;
+    }
+    oOptions.viewport       = oOptions.viewport || { };
+    oOptions.viewport.width = oOptions.viewport.width || 1920;
+    oOptions.viewport.height = oOptions.viewport.height || 1920;
+
     var oEmulate = null;
     if ( oOptions.mobile && oOptions.mobile.emulate === true ) {
       var sDevice = "";
@@ -31,23 +50,6 @@ module.exports = function (grunt) {
       oEmulate = devices[ sDevice ];
     }
 
-    if (!oOptions.chromeExecutable) {
-      grunt.fail.warn('chromeUrl missing.');
-      done();
-      return;
-    }
-    if (typeof oOptions.headless === "undefined") {
-      oOptions.headless = true;
-    }
-    oOptions.viewport       = oOptions.viewport || { };
-    oOptions.viewport.width = oOptions.viewport.width || 1920;
-    oOptions.viewport.height = oOptions.viewport.height || 1920;
-
-    if (!oOptions.qunitPage) {
-      grunt.fail.warn('qunitPage missing.');
-      done();
-      return;
-    }
     grunt.log.writeln('Processing task...');
 
     const targetURL = oOptions.qunitPage;
