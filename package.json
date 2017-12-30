@@ -10,7 +10,16 @@
     "url": "git+https://github.com/davidtaylorhq/qunit-puppeteer.git"
   },
   "dependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-shell": "^1.1.1",
     "puppeteer": "^0.9.0"
+  },
+  "peerDependencies": {
+    "grunt": ">=0.4.0"
+  },
+  "scripts": {
+    "test": "grunt"
   },
   "keywords": [
     "qunit",

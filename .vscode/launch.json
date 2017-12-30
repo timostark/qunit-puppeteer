@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Grunt",
+            "args": ["doTestChrome"],            
+            "program": "${env:APPDATA}\\npm\\node_modules\\grunt-cli\\bin\\grunt", 
+            "stopOnEntry": true,
+            "cwd": "${workspaceRoot}"
+        }
+    ]
+}
