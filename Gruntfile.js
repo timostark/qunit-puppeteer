@@ -16,7 +16,7 @@ module.exports = function (grunt) {
                         landscape: true,
                         tablet: false
                     },
-                    qunitPage: "https://localhost:9557/test/integration/opaTests.qunit.html?module=BNZ-ALZ%20Model%20Assignment%20-%20Write%20Mode%20%2F%20Create%20%2F%20Delete#//BNZALZ"
+                    qunitPage: "https://localhost:9557/test/integration/opaTests.qunit.html?module=BNZ-ALZ%20Delta%20-%20Write%20Mode%20%2F%20Create%20%2F%20Delete#/ShiftSchedule/PlantSet/0000000002/1040"
                 }
             }
         },

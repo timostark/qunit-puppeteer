@@ -12,7 +12,7 @@ module.exports = function (grunt) {
     var oOptions = this.options({
       resources: {}
     });
-    
+
     /*if (!oOptions.chromeExecutable) {
       grunt.fail.warn('chromeUrl missing.');
       done();
@@ -23,31 +23,31 @@ module.exports = function (grunt) {
       done();
       return;
     }
-    
+
     if (typeof oOptions.headless === "undefined") {
       oOptions.headless = true;
     }
-    oOptions.viewport       = oOptions.viewport || { };
+    oOptions.viewport = oOptions.viewport || {};
     oOptions.viewport.width = oOptions.viewport.width || 1920;
     oOptions.viewport.height = oOptions.viewport.height || 1920;
 
     var oEmulate = null;
-    if ( oOptions.mobile && oOptions.mobile.emulate === true ) {
+    if (oOptions.mobile && oOptions.mobile.emulate === true) {
       var sDevice = "";
-      if ( oOptions.mobile.tablet === true ) {
+      if (oOptions.mobile.tablet === true) {
         sDevice = "iPad Pro";
-      } else if ( oOptions.mobile.landscape === true && oOptions.mobile.tablet === false ) {
+      } else if (oOptions.mobile.landscape === true && oOptions.mobile.tablet === false) {
         sDevice = "iPhone 6 Plus landscape";
-      } else if ( oOptions.mobile.landscape === false && oOptions.mobile.tablet === false ) {
+      } else if (oOptions.mobile.landscape === false && oOptions.mobile.tablet === false) {
         sDevice = "iPhone 6 Plus";
       }
 
-      if ( !devices[ sDevice ] ) {
+      if (!devices[sDevice]) {
         grunt.fail.warn('specified device emulated is not available.');
         done();
         return;
       }
-      oEmulate = devices[ sDevice ];
+      oEmulate = devices[sDevice];
     }
 
     grunt.log.writeln('Processing task...');
@@ -63,8 +63,8 @@ module.exports = function (grunt) {
       });
       const page = await browser.newPage();
       page.setViewport({ width: oOptions.viewport.width, height: oOptions.viewport.height });
-      if ( oEmulate ) {
-        await page.emulate(oEmulate);        
+      if (oEmulate) {
+        await page.emulate(oEmulate);
       }
 
       // Attach to browser console log events, and log to node console
@@ -119,7 +119,6 @@ module.exports = function (grunt) {
             console.error(moduleErrors[idx] + "\n");
           }
         }
-
         var stats = [
           "Time: " + context.runtime + "ms",
           "Total: " + context.total,
@@ -130,7 +129,7 @@ module.exports = function (grunt) {
 
         browser.close();
         if (context.failed > 0) {
-          process.exit(1);
+          grunt.fail.warn('QUnit found error messages (' + context.failed + ')');
         } else {
           done();
         }
@@ -147,7 +146,10 @@ module.exports = function (grunt) {
 
         console.log("\nRunning: " + JSON.stringify(QUnit.urlParams) + "\n");
       });
-    })();
+    })().catch((error) => {
+      console.error(error);
+      grunt.fail.warn('QUnit found exception (' + error.message + ')');
+    });
   });
 };
 
