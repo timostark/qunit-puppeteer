@@ -13,17 +13,15 @@ module.exports = function (grunt) {
       resources: {}
     });
 
-    /*if (!oOptions.chromeExecutable) {
-      grunt.fail.warn('chromeUrl missing.');
-      done();
-      return;
-    }*/
     if (!oOptions.qunitPage) {
       grunt.fail.warn('qunitPage missing.');
       done();
       return;
     }
 
+    oOptions.traceSettings = oOptions.traceSettings || {};
+    oOptions.traceSettings.outputConsole = typeof oOptions.traceSettings.outputConsole !== "undefined" ? oOptions.traceSettings.outputConsole : false;
+    oOptions.traceSettings.outputAllAssertions = typeof oOptions.traceSettings.outputAllAssertions !== "undefined" ? oOptions.traceSettings.outputAllAssertions : false;
     if (typeof oOptions.headless === "undefined") {
       oOptions.headless = true;
     }
@@ -50,13 +48,23 @@ module.exports = function (grunt) {
       oEmulate = devices[sDevice];
     }
 
-    grunt.log.writeln('Processing task...');
-
     const targetURL = oOptions.qunitPage;
     const timeout = parseInt(300000, 10);
     (async () => {
-      grunt.log.writeln('Started...');
+      grunt.log.ok("Async Processing of test started");
+      const args = [
+        "--disable-web-security",
+        "--ignore-certificate-errors",
+      ];
+      //hack to resolve everything at the end
+      var fnPromiseResolve, fnPromiseReject;
+      var oTestSuitePromise = new Promise(function (resolve, reject) {
+        fnPromiseResolve = resolve;
+        fnPromiseReject = reject;
+      });
+
       const browser = await puppeteer.launch({
+        args,
         headless: oOptions.headless,
         ignoreHTTPSErrors: true,
         executablePath: oOptions.chromeExecutable
@@ -68,84 +76,89 @@ module.exports = function (grunt) {
       }
 
       // Attach to browser console log events, and log to node console
-      await page.on('console', (...params) => {
-        for (let i = 0; i < params.length; ++i)
-          console.log(`${params[i]}`);
-      });
-
-      var moduleErrors = [];
-      var testErrors = [];
-      var assertionErrors = [];
+      if (oOptions.traceSettings.outputConsole === true) {
+        await page.on('console', (...params) => {
+          for (let i = 0; i < params.length; ++i)
+            console.log(`${params[i]}`);
+        });
+      }
 
       await page.exposeFunction('harness_moduleDone', context => {
         if (context.failed) {
-          var msg = "Module Failed: " + context.name + "\n" + testErrors.join("\n");
-          moduleErrors.push(msg);
-          testErrors = [];
+          grunt.log.error("Module Failed: " + context.name + " ( " + context.failed + " / " + context.passed + " ) in " + context.runtime + "ms");
+        } else {
+          grunt.log.ok("Module Succeeded: " + context.name + " (" + context.passed + " Tests) in " + context.runtime + "ms");
         }
       });
 
       await page.exposeFunction('harness_testDone', context => {
         if (context.failed) {
-          var msg = "  Test Failed: " + context.name + assertionErrors.join("    ");
-          testErrors.push(msg);
-          assertionErrors = [];
-          process.stdout.write("F");
+          grunt.log.error("Test Failed: " + context.name + " ( " + context.failed + " / " + context.passed + " ) in " + context.runtime + "ms");
         } else {
-          process.stdout.write(".");
+          grunt.log.ok("Test Succeeded: " + context.name + " (" + context.passed + " Tests) in " + context.runtime + "ms");
         }
+      });
+
+      await page.exposeFunction('harness_moduleStart', context => {
+        grunt.log.ok("Start Module:" + context.name);
+      });
+
+      await page.exposeFunction('harness_testStart', context => {
+        grunt.log.ok("Start Test:" + context.name);
       });
 
       await page.exposeFunction('harness_log', context => {
-        if (context.result) { return; } // If success don't log
-
-        var msg = "\n    Assertion Failed:";
-        if (context.message) {
-          msg += " " + context.message;
+        if (oOptions.traceSettings.outputAllAssertions === false && context.result) {
+          return;
         }
-
-        if (context.expected) {
-          msg += "\n      Expected: " + context.expected + ", Actual: " + context.actual;
+        if (!context.result) {
+          grunt.log.error("Assertion Failed: " + (context.message ? context.message : "unknown") + "; Values:" + context.expected + "/" + context.actual);
+        } else {
+          grunt.log.ok("Assertion Succeeded: " + (context.message ? context.message : "unknown") + "; Values:" + context.expected + "/" + context.actual);
         }
-
-        assertionErrors.push(msg);
       });
 
       await page.exposeFunction('harness_done', context => {
-        console.log("\n");
-
-        if (moduleErrors.length > 0) {
-          for (var idx = 0; idx < moduleErrors.length; idx++) {
-            console.error(moduleErrors[idx] + "\n");
-          }
-        }
         var stats = [
           "Time: " + context.runtime + "ms",
           "Total: " + context.total,
           "Passed: " + context.passed,
           "Failed: " + context.failed
         ];
-        console.log(stats.join(", "));
+        grunt.log.ok(stats.join(", "));
 
-        browser.close();
-        if (context.failed > 0) {
-          grunt.fail.warn('QUnit found error messages (' + context.failed + ')');
-        } else {
-          done();
-        }
+        //hacky coding - waiting for 500ms, will avoid unhandled open promises
+        //we are in a completly different scope here (of the page from my understanding)
+        //the promise might be resolved to early, in case we are not waiting..
+        setTimeout(function () {
+          if (context.failed > 0) {
+            fnPromiseReject({
+              context: context
+            });
+          }
+          fnPromiseResolve();
+        }, 500);
       });
 
-      await page.goto(targetURL);
+      await page.goto(targetURL, { timeout: 50000, waitUntil: "load" });
       await page.evaluate(() => {
-        // Cannot pass the window.harness_blah methods directly, because they are
-        // automatically defined as async methods, which QUnit does not support
+        QUnit.moduleStart((context) => { window.harness_moduleStart(context); });
         QUnit.moduleDone((context) => { window.harness_moduleDone(context); });
+        QUnit.testStart((context) => { window.harness_testStart(context); });
         QUnit.testDone((context) => { window.harness_testDone(context); });
         QUnit.log((context) => { window.harness_log(context); });
         QUnit.done((context) => { window.harness_done(context); });
-
-        console.log("\nRunning: " + JSON.stringify(QUnit.urlParams) + "\n");
       });
+
+      try {
+        await oTestSuitePromise;
+      } catch (e) {
+        await browser.close(); //close always to avoid memory leaks
+        grunt.fail.warn('OPA/QUnit identified errors (' + e.context.failed + ')');
+      }
+
+      await browser.close();
+      done();
     })().catch((error) => {
       console.error(error);
       grunt.fail.warn('QUnit found exception (' + error.message + ')');

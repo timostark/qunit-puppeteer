@@ -1,21 +1,27 @@
-# qunit-puppeteer
-A test harness for running QUnit tests in headless Chromium
+# grunt-qunit-puppeteer
+A test harness for running QUnit/OPA tests in headless Chromium via grunt
 
 ## Usage
 ```
-npm install -g qunit-puppeteer
-qunit-puppeteer http://localhost:3000/qunit
-```
-where `http://localhost:3000/qunit` is the address of the qunit test page on your server.
+npm install grunt-qunit-puppeteer
+Add Grunt Task as described within the example in this repository + Run Grunt with grunt-qunit-puppeteer task (see example)
 
 The output will look something like this:
 
-```
-Running: {}
 
-............................................................................................................................................................................
+Running "qunit_puppeteer:test" (qunit_puppeteer) task
+>> Async Processing of test started
+>> Start Module:[Module Name - Description]
+>> Start Test:Should see the master list with all entries
+>> Test Succeeded: Should see the master list with all entries (2 Tests) in 2450ms
+...............
+>> Start Test:Test Description
+>> Assertion Failed: Assertion Description; Values:true/false
+>> Test Failed: Test Description  ( 1 / 1 ) in 299ms
+................
+>> Module Failed: Module Name ( 1 / 56 ) in 11521ms
+...............
+>> Time: 11537ms, Total: 57, Passed: 56, Failed: 1
+Warning: OPA/QUnit identified errors (1) Use --force to continue.
 
-Time: 27157ms, Total: 173, Passed: 173, Failed: 0
-```
-
-The exit code of the process will be 1 for fail, 0 for success
+Aborted due to warnings.
