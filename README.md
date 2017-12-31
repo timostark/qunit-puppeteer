@@ -5,10 +5,11 @@ A test harness for running QUnit/OPA tests in headless Chromium via grunt
 ```
 npm install grunt-qunit-puppeteer
 Add Grunt Task as described within the example in this repository + Run Grunt with grunt-qunit-puppeteer task (see example)
+```
 
 The output will look something like this:
 
-
+```
 Running "qunit_puppeteer:test" (qunit_puppeteer) task
 >> Async Processing of test started
 >> Start Module:[Module Name - Description]
@@ -25,3 +26,4 @@ Running "qunit_puppeteer:test" (qunit_puppeteer) task
 Warning: OPA/QUnit identified errors (1) Use --force to continue.
 
 Aborted due to warnings.
+```

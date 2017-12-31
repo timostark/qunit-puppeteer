@@ -1,6 +1,6 @@
 {
   "name": "grunt-qunit-puppeteer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A test harness for running QUnit tests in headless Chromium (in Grunt)",
   "repository": {
     "type": "git",
