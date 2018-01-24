@@ -89,6 +89,7 @@ module.exports = function (grunt) {
         } else {
           grunt.log.ok("Module Succeeded: " + context.name + " (" + context.passed + " Tests) in " + context.runtime + "ms");
         }
+        grunt.event.emit('qunit.moduleDone', context.name, context.failed, context.passed, context.total);
       });
 
       await page.exposeFunction('harness_testDone', context => {
@@ -97,17 +98,21 @@ module.exports = function (grunt) {
         } else {
           grunt.log.ok("Test Succeeded: " + context.name + " (" + context.passed + " Tests) in " + context.runtime + "ms");
         }
+        grunt.event.emit('qunit.testDone', context.name, context.failed, context.passed, context.total);
       });
 
       await page.exposeFunction('harness_moduleStart', context => {
         grunt.log.ok("Start Module:" + context.name);
+        grunt.event.emit('qunit.moduleStart', context.name);
       });
 
       await page.exposeFunction('harness_testStart', context => {
         grunt.log.ok("Start Test:" + context.name);
+        grunt.event.emit('qunit.testStart', context.name);
       });
 
       await page.exposeFunction('harness_log', context => {
+        grunt.event.emit('qunit.log', context.result, context.actual, context.expected, context.rawMessage, context.source);
         if (oOptions.traceSettings.outputAllAssertions === false && context.result) {
           return;
         }
@@ -126,6 +131,7 @@ module.exports = function (grunt) {
           "Failed: " + context.failed
         ];
         grunt.log.ok(stats.join(", "));
+        grunt.event.emit('qunit.done', context.failed, context.passed, context.total, context.runtime);
 
         //hacky coding - waiting for 500ms, will avoid unhandled open promises
         //we are in a completly different scope here (of the page from my understanding)
@@ -141,6 +147,7 @@ module.exports = function (grunt) {
       });
 
       await page.goto(targetURL, { timeout: 50000, waitUntil: "load" });
+      grunt.event.emit('qunit.spawn', targetURL);
       await page.evaluate(() => {
         QUnit.moduleStart((context) => { window.harness_moduleStart(context); });
         QUnit.moduleDone((context) => { window.harness_moduleDone(context); });
